@@ -11,6 +11,7 @@ public:
 
     virtual void Render(const std::unordered_map<EntityID, std::unique_ptr<Entity>> &entities) {}
     virtual void Resize(const std::unordered_map<EntityID, std::unique_ptr<Entity>>& entities, int w, int h) {}
+    virtual void Draw(const std::unordered_map<EntityID, std::unique_ptr<Entity>> &entities) {}
 
     virtual void Start(const std::unordered_map<EntityID, std::unique_ptr<Entity>> &entities) {}
     virtual void Update(const std::unordered_map<EntityID, std::unique_ptr<Entity>> &entities, const float &deltaTime) {}
