@@ -9,5 +9,5 @@ public:
     virtual void Clean() {}
     virtual void Start() {}
     virtual void Update(const float &deltaTime) {}
-    virtual void Draw() {}
+    virtual void DrawUI() {}
 };
