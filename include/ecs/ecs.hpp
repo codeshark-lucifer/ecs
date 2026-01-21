@@ -3,6 +3,9 @@
 #include "./entity.hpp"
 #include <unordered_map>
 #include <memory>
+#include <utils/matrix.h>
+#include <utils/vector.h>
+#include <utils/quat.h>
 
 using EntityMap = std::unordered_map<EntityID, std::unique_ptr<Entity>>;
 
