@@ -34,7 +34,7 @@ void World::FlushCommands()
 
             // Automatically add Transform Component
             auto t = std::make_unique<Transform>();
-            e->AddComponent(std::move(t));
+            e->AddComponent<Transform>();
 
             EntityID id = e->GetID();
             entities.emplace(id, std::move(e));
