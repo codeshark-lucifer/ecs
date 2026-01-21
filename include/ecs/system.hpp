@@ -1,18 +1,16 @@
 #pragma once
-#include "./entity.hpp"
+class World;
 
 class System
 {
 public:
-    const char *name = "System";
-    System(const char *name) : name(name) {}
-    ~System() { Clean(); }
-    virtual void Clean() {}
+    const char* name;
+    explicit System(const char* n) : name(n) {}
+    virtual ~System() = default;
 
-    virtual void Render(const std::unordered_map<EntityID, std::unique_ptr<Entity>> &entities) {}
-    virtual void Resize(const std::unordered_map<EntityID, std::unique_ptr<Entity>>& entities, int w, int h) {}
-    virtual void DrawUI(const std::unordered_map<EntityID, std::unique_ptr<Entity>> &entities) {}
-
-    virtual void Start(const std::unordered_map<EntityID, std::unique_ptr<Entity>> &entities) {}
-    virtual void Update(const std::unordered_map<EntityID, std::unique_ptr<Entity>> &entities, const float &deltaTime) {}
+    virtual void OnStart(World& world) {}
+    virtual void OnUpdate(World& world, float dt) {}
+    virtual void OnRender(World& world) {}
+    virtual void OnUI(World& world) {}
+    virtual void OnResize(World& world, int w, int h) {}
 };
