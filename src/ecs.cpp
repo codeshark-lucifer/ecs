@@ -1,42 +1,37 @@
 #include <ecs/ecs.hpp>
 
+// ----------------- Helpers -----------------
 Entity* FindEntity(EntityID id, const EntityMap& entities)
 {
     auto it = entities.find(id);
-    return (it != entities.end()) ? it->second.get() : nullptr;
+    if (it != entities.end()) return it->second.get();
+    return nullptr;
 }
 
-Entity* CreateEntity(const char* name, EntityMap& entities)
+Entity* CreateEntity(const char* name, World& world)
 {
-    auto entity = std::make_unique<Entity>(name);
-    EntityID id = entity->GetID();
-
-    auto [it, inserted] = entities.emplace(id, std::move(entity));
-    return it->second.get();
+    world.QueueAddEntity(name);
+    return nullptr; // cannot return actual pointer immediately (thread-safe)
 }
 
-static mat4 ComputeWorldMatrix(Entity* entity, const EntityMap& entities)
+// ----------------- Transform Component -----------------
+void Transform::Update(const float& dt)
 {
-    mat4 result = mat4::Identity();
+    // compute local transform
+    matrix = mat4::Translate(position) * mat4::Rotate(rotation) * mat4::Scale(scale);
+}
 
-    while (entity)
+// ----------------- Transform System -----------------
+void UpdateTransforms(World& world, const float& dt)
+{
+    for (auto& [id, entity] : world.GetEntities())
     {
-        result = entity->transform.local() * result;
-
-        EntityID parentID = entity->transform.parent;
-        if (parentID == INVALID_ENTITY_ID)
-            break;
-
-        entity = FindEntity(parentID, entities);
-    }
-
-    return result;
-}
-
-void UpdateTransforms(EntityMap& entities)
-{
-    for (auto& [id, entity] : entities)
-    {
-        entity->transform.matrix = ComputeWorldMatrix(entity.get(), entities);
+        for (auto* comp : entity->GetAllComponent())
+        {
+            if (auto* t = dynamic_cast<Transform*>(comp))
+            {
+                t->Update(dt);
+            }
+        }
     }
 }

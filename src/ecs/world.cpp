@@ -1,30 +1,49 @@
 #include <ecs/world.hpp>
+#include <cstdio>
+#include <ecs/ecs.hpp>
 
-EntityID World::CreateEntity()
+void World::QueueAddEntity(const char *name)
 {
-    EntityID id;
-
-    if (!freeList.empty())
-    {
-        id = freeList.back();
-        freeList.pop_back();
-        alive[id] = true;
-    }
-    else
-    {
-        id = nextID++;
-        alive.push_back(true);
-    }
-
-    return id;
+    std::scoped_lock lock(cmdMutex);
+    Command cmd;
+    cmd.type = CommandType::AddEntity;
+    cmd.name = name;
+    commandQueue.push(cmd);
 }
 
-void World::DestroyEntity(EntityID id)
+void World::QueueRemoveEntity(EntityID id)
 {
-    if (id < alive.size() && alive[id])
+    std::scoped_lock lock(cmdMutex);
+    Command cmd;
+    cmd.type = CommandType::RemoveEntity;
+    cmd.id = id;
+    commandQueue.push(cmd);
+}
+
+void World::FlushCommands()
+{
+    std::scoped_lock lock(cmdMutex);
+    while (!commandQueue.empty())
     {
-        alive[id] = false;
-        freeList.push_back(id);
-        // also remove all components of this entity
+        Command cmd = commandQueue.front();
+        commandQueue.pop();
+
+        if (cmd.type == CommandType::AddEntity)
+        {
+            auto e = std::make_unique<Entity>(cmd.name.c_str());
+
+            // Automatically add Transform Component
+            auto t = std::make_unique<Transform>();
+            e->AddComponent(std::move(t));
+
+            EntityID id = e->GetID();
+            entities.emplace(id, std::move(e));
+            printf("[World] Entity %s (%u) added\n", cmd.name.c_str(), id);
+        }
+        else if (cmd.type == CommandType::RemoveEntity)
+        {
+            entities.erase(cmd.id);
+            printf("[World] Entity %u removed\n", cmd.id);
+        }
     }
 }
