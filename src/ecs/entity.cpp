@@ -1,13 +1,12 @@
 #include <ecs/entity.hpp>
 
-static std::atomic<EntityID> g_NextID{1};
-
-Entity::Entity(const char* name)
-    : id(GenID()), name(name)
+// Entity constructors
+Entity::Entity(EntityID id, const char *name)
+    : id(id), name(name)
 {
 }
 
-EntityID Entity::GenID()
+Entity::Entity(const char *name)
+    : id(++nextID), name(name)
 {
-    return g_NextID.fetch_add(1, std::memory_order_relaxed);
 }

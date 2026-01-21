@@ -22,18 +22,14 @@ class World
 public:
     World() = default;
 
-    // Queue commands from main thread
-    void QueueAddEntity(const char* name);
-    void QueueRemoveEntity(EntityID id);
-
-    // Apply queued commands in update thread
-    void FlushCommands();
+    Entity *AddEntity(const char *name);
+    void RemoveEntity(EntityID id);
 
     // Direct access to entities
-    EntityMap& GetEntities() { return entities; }
+    EntityMap &GetEntities() { return entities; }
 
 private:
     EntityMap entities;
-    std::queue<Command> commandQueue;
-    std::mutex cmdMutex;
+    // std::queue<Command> commandQueue;
+    // std::mutex cmdMutex;
 };
